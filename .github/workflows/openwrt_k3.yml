@@ -51,7 +51,7 @@ env:
   #==========================
   # Specify here your config file
   # 在这里指定你的配置文件名
-  CONFIG_FILE: k3W.config
+  CONFIG_FILE: k3.config
   #==========================
   # 编译前运行的脚本
   DIY_P1_SH: diy-part1.sh
