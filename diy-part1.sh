@@ -13,7 +13,8 @@
 # Uncomment a feed source
 mkdir -p package/base-files/files/config
 echo 0xDEADBEEF > package/base-files/files/config/google_fu_mode
-sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
+#sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
+echo "src-git helloworld https://github.com/fw876/helloworld">>feeds.conf.default
 #sed -i 's/export GOPROXY/#export GOPROXY/g' package/lean/UnblockNeteaseMusicGo/Makefile;
 #sed -i 's/export GOPROXY/#export GOPROXY/g' package/lean/v2ray-plugin/Makefile;
 # Add a feed source
