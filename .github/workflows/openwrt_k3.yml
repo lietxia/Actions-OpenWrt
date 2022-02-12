@@ -64,7 +64,7 @@ env:
   UPLOAD_FIRMWARE: true
   #==========================
   # 是否上传固件到COWTRANSFER
-  UPLOAD_COWTRANSFER: true
+  UPLOAD_COWTRANSFER: false
   #==========================
   # 是否上传固件到WETRANSFER
   UPLOAD_WETRANSFER: true
