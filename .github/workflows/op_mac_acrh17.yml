@@ -1,3 +1,10 @@
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
 #==========================
 # 工作流的名字（随便写）
 name: op_mac_acrh17
@@ -75,7 +82,7 @@ jobs:
           brew install coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
           brew install gcc@11
           brew upgrade coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
-          brew upgrade gcc@11 make gmake
+          brew upgrade gcc@11 make cmake
           echo 'export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"' >> ~/.bashrc
           echo 'export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"' >> ~/.bashrc
           echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bashrc
@@ -93,19 +100,17 @@ jobs:
           ln -sf /Volumes/OpenWrt/workdir/openwrt ./openwrt
 
       - name: Load custom feeds 加载自定义feeds
-        working-directory: /Volumes/OpenWrt/workdir/openwrt
         run: |
           [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
           chmod +x $DIY_P1_SH
+          cd openwrt
           $GITHUB_WORKSPACE/$DIY_P1_SH
 
       - name: Update feeds 更新feeds
-        working-directory: /Volumes/OpenWrt/workdir/openwrt
-        run: ./scripts/feeds update -a
+        run: cd openwrt && ./scripts/feeds update -a
 
       - name: Install feeds 安装feeds
-        working-directory: /Volumes/OpenWrt/workdir/openwrt
-        run: ./scripts/feeds install -a
+        run: cd openwrt && ./scripts/feeds install -a
 
       - name: Load custom configuration 读取自定义配置
         run: |
@@ -116,18 +121,18 @@ jobs:
           $GITHUB_WORKSPACE/$DIY_P2_SH
 
       - name: Download package 下载插件资源
-        working-directory: /Volumes/OpenWrt/workdir/openwrt
         id: package
         run: |
+          cd openwrt
           make defconfig
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
 
       - name: Compile the firmware 编译固件
-        working-directory: /Volumes/OpenWrt/workdir/openwrt
         id: compile
         run: |
+          cd openwrt
           echo -e "$(nproc) thread compile"
           make -j$(nproc) || make -j1 || make -j1 V=s
           echo "::set-output name=status::success"
@@ -144,7 +149,7 @@ jobs:
         if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
         with:
           name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-          path: /Volumes/OpenWrt/workdir/openwrt/bin
+          path: openwrt/bin
 
       - name: Organize files 安排文件
         id: organize
