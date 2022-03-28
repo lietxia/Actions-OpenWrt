@@ -1,11 +1,8 @@
 
 name: macOS debug
 on:
-  push:
-    paths:
-      - "acrh17.config"
-    branches:
-      - master
+  repository_dispatch:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: macos-latest
