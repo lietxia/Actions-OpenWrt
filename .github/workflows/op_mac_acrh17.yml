@@ -75,7 +75,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           cd ~
-          sudo hdiutil create -size 40g -type SPARSE -fs "Case-sensitive HFS+" -volname OpenWrt OpenWrt.sparseimage
+          sudo hdiutil create -size 60g -type SPARSE -fs "Case-sensitive HFS+" -volname OpenWrt OpenWrt.sparseimage
           sudo hdiutil attach OpenWrt.sparseimage -notremovable -autoopenrw
           sudo mkdir -p /Volumes/OpenWrt/workdir
           sudo chown $USER:$GROUPS /Volumes/OpenWrt/workdir
