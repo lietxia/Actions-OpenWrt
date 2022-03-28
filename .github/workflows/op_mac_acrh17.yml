@@ -1,13 +1,3 @@
-#
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-#
-
 #==========================
 # 工作流的名字（随便写）
 name: op_mac_acrh17
@@ -77,32 +67,45 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          cd ~
           sudo hdiutil create -size 40g -type SPARSE -fs "Case-sensitive HFS+" -volname OpenWrt OpenWrt.sparseimage
-          hdiutil attach OpenWrt.sparseimage -autoopenrw
-          brew install coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
-          brew install gcc@11
+          sudo hdiutil attach OpenWrt.sparseimage -notremovable -autoopenrw
           sudo mkdir -p /Volumes/OpenWrt/workdir
           sudo chown $USER:$GROUPS /Volumes/OpenWrt/workdir
+          brew install coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
+          brew install gcc@11
+          brew upgrade coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
+          brew upgrade gcc@11 make gmake
+          echo 'export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"' >> ~/.bashrc
+          source ~/.bashrc
 
       - name: Clone source code 抓取源码
-        working-directory: /Volumes/OpenWrt/workdir
         run: |
           df -hT $PWD
-          git clone $REPO_URL -b $REPO_BRANCH openwrt
-          ln -sf /Volumes/OpenWrt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
+          git clone $REPO_URL -b $REPO_BRANCH /Volumes/OpenWrt/workdir/openwrt
+          mkdir openwrt
+          ln -sf /Volumes/OpenWrt/workdir/openwrt ./openwrt
 
       - name: Load custom feeds 加载自定义feeds
+        working-directory: /Volumes/OpenWrt/workdir/openwrt
         run: |
           [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
           chmod +x $DIY_P1_SH
-          cd openwrt
           $GITHUB_WORKSPACE/$DIY_P1_SH
 
       - name: Update feeds 更新feeds
-        run: cd openwrt && ./scripts/feeds update -a
+        working-directory: /Volumes/OpenWrt/workdir/openwrt
+        run: ./scripts/feeds update -a
 
       - name: Install feeds 安装feeds
-        run: cd openwrt && ./scripts/feeds install -a
+        working-directory: /Volumes/OpenWrt/workdir/openwrt
+        run: ./scripts/feeds install -a
 
       - name: Load custom configuration 读取自定义配置
         run: |
@@ -113,18 +116,18 @@ jobs:
           $GITHUB_WORKSPACE/$DIY_P2_SH
 
       - name: Download package 下载插件资源
+        working-directory: /Volumes/OpenWrt/workdir/openwrt
         id: package
         run: |
-          cd openwrt
           make defconfig
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
 
       - name: Compile the firmware 编译固件
+        working-directory: /Volumes/OpenWrt/workdir/openwrt
         id: compile
         run: |
-          cd openwrt
           echo -e "$(nproc) thread compile"
           make -j$(nproc) || make -j1 || make -j1 V=s
           echo "::set-output name=status::success"
@@ -141,7 +144,7 @@ jobs:
         if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
         with:
           name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-          path: openwrt/bin
+          path: /Volumes/OpenWrt/workdir/openwrt/bin
 
       - name: Organize files 安排文件
         id: organize
