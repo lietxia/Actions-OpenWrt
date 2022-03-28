@@ -1,0 +1,8 @@
+name: macOS debug
+on: push
+jobs:
+  macOS:
+    runs-on: macos-latest
+    steps:
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@latest
