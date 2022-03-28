@@ -1,9 +1,11 @@
 
 name: macOS debug
 on:
-  pull_request:
+  push:
+    paths:
+      - "acrh17.config"
     branches:
-    - main
+      - master
 jobs:
   build:
     runs-on: macos-latest
