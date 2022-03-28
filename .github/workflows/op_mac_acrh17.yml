@@ -82,7 +82,6 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          brew unlink awk
           brew install coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
           brew install gcc@11
           sudo mkdir -p /workdir
