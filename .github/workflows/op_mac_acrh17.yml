@@ -84,15 +84,15 @@ jobs:
         run: |
           brew install coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
           brew install gcc@11
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
+          sudo mkdir -p ./workdir
+          sudo chown $USER:$GROUPS ./workdir
 
       - name: Clone source code 抓取源码
-        working-directory: /workdir
+        working-directory: ./workdir
         run: |
           df -hT $PWD
           git clone $REPO_URL -b $REPO_BRANCH openwrt
-          ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+          ln -sf ./workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
       - name: Load custom feeds 加载自定义feeds
         run: |
