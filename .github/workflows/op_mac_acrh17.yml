@@ -82,17 +82,19 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          sudo hdiutil create -size 40g -type SPARSE -fs "Case-sensitive HFS+" -volname OpenWrt OpenWrt.sparseimage
+          hdiutil attach OpenWrt.sparseimage
           brew install coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
           brew install gcc@11
-          sudo mkdir -p ./workdir
-          sudo chown $USER:$GROUPS ./workdir
+          sudo mkdir -p /Volumes/OpenWrt/workdir
+          sudo chown $USER:$GROUPS /Volumes/OpenWrt/workdir
 
       - name: Clone source code 抓取源码
-        working-directory: ./workdir
+        working-directory: /Volumes/OpenWrt/workdir
         run: |
           df -hT $PWD
           git clone $REPO_URL -b $REPO_BRANCH openwrt
-          ln -sf ./workdir/openwrt $GITHUB_WORKSPACE/openwrt
+          ln -sf /Volumes/OpenWrt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
       - name: Load custom feeds 加载自定义feeds
         run: |
