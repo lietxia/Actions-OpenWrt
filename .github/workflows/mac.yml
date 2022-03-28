@@ -1,8 +1,9 @@
 name: macOS debug
-on: push
+on: [push]
 jobs:
-  macOS:
+  build:
     runs-on: macos-latest
     steps:
+    - uses: actions/checkout@v2
     - name: Setup tmate session
-      uses: mxschmitt/action-tmate@latest
+      uses: mxschmitt/action-tmate@v3
