@@ -85,7 +85,6 @@ jobs:
           brew upgrade gcc@11 coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz cmake
           sudo echo 'export PATH="/usr/local/opt/make/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/opt/gnu-getopt/bin:/usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/findutils/libexec/gnubin:$PATH"' >> ~/.bashrc
           source ~/.bashrc
-          make --version
 
       - name: Clone source code 抓取源码
         run: |
@@ -100,14 +99,16 @@ jobs:
           cd /Volumes/OpenWrt/workdir/openwrt
           $GITHUB_WORKSPACE/$DIY_P1_SH
 
-      - name: Update feeds 更新feeds
-        run: cd /Volumes/OpenWrt/workdir/openwrt && ./scripts/feeds update -a
-
-      - name: Install feeds 安装feeds
-        run: cd /Volumes/OpenWrt/workdir/openwrt && ./scripts/feeds install -a
+      - name: Update & install feeds 更新&安装feeds
+        run: |
+          cd /Volumes/OpenWrt/workdir/openwrt 
+          source ~/.bashrc
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
       - name: Load custom configuration 读取自定义配置
         run: |
+          source ~/.bashrc
           [ -e files ] && mv files /Volumes/OpenWrt/workdir/openwrt/files
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE /Volumes/OpenWrt/workdir/openwrt/.config
           chmod +x $DIY_P2_SH
@@ -118,6 +119,7 @@ jobs:
         id: package
         run: |
           cd /Volumes/OpenWrt/workdir/openwrt
+          source ~/.bashrc
           make defconfig
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
@@ -126,6 +128,7 @@ jobs:
       - name: Compile the firmware 编译固件
         id: compile
         run: |
+          source ~/.bashrc
           make --version
           cd /Volumes/OpenWrt/workdir/openwrt
           echo -e "$(nproc) thread compile"
