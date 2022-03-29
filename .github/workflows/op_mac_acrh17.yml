@@ -79,7 +79,7 @@ jobs:
           sudo mkdir -p /Volumes/OpenWrt/workdir
           sudo chown $USER:$GROUPS /Volumes/OpenWrt/workdir
           brew update
-          brew install coreutils diffutils findutils gawk gnu-getopt grep quilt cmake
+          brew install coreutils diffutils findutils gawk gettext gnu-getopt grep quilt cmake libtool mercurial openssl wget xz
           brew install gcc@11 
           brew install make
           brew upgrade gcc@11 coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz cmake
