@@ -80,7 +80,7 @@ jobs:
           sudo chown $USER:$GROUPS /Volumes/OpenWrt/workdir
           brew update
           brew install coreutils diffutils findutils gawk gnu-getopt grep quilt
-          brew install gcc@11 make cmake awk
+          brew install gcc@11 make cmake
           brew upgrade coreutils diffutils findutils gawk gnu-getopt gnu-tar grep wget quilt xz
           brew upgrade gcc@11 cmake
           echo 'export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"' >> ~/.bashrc
