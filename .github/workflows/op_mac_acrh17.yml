@@ -79,8 +79,8 @@ jobs:
           sudo mkdir -p /Volumes/OpenWrt/workdir
           sudo chown $USER:$GROUPS /Volumes/OpenWrt/workdir
           brew update
-          brew install coreutils diffutils findutils gawk gettext gnu-getopt grep quilt cmake libtool mercurial openssl wget xz gnu-tar git-extras svn make ncurses pkg-config          brew install gcc@11 
-          brew upgrade
+          brew install gcc@11 coreutils diffutils findutils gawk gettext gnu-getopt grep quilt cmake libtool mercurial openssl wget xz gnu-tar git-extras svn make ncurses pkg-config
+          brew upgrade gcc@11 coreutils diffutils findutils gawk gettext gnu-getopt grep quilt cmake libtool mercurial openssl wget xz gnu-tar git-extras svn make ncurses pkg-config
           sudo echo 'export PATH="/usr/local/opt/make/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/opt/gnu-getopt/bin:/usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/findutils/libexec/gnubin:$PATH"' >> ~/.bashrc
           source ~/.bashrc
 
