@@ -1,0 +1,148 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com
+#=================================================
+
+#==========================
+# 工作流的名字（随便写）
+name: openwrt_acrh17m
+#==========================
+env:
+  #==========================
+  # 编译前运行的脚本
+  DIY_SH: diy.sh
+  #==========================
+  # Specify here the OpenWrt Repo URL and Branch
+  # 在这里指定你的OpenWrt的仓库地址URL和分支
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  #==========================
+  # 是否启用SSH
+  SSH_ACTIONS: false
+  #==========================
+  # 是否上传BIN文件夹
+  UPLOAD_BIN_DIR: false
+  #==========================
+  # 是否上传固件
+  UPLOAD_FIRMWARE: true
+  #==========================
+  # 是否上传固件到COWTRANSFER
+  UPLOAD_COWTRANSFER: true
+  #==========================
+  # 是否上传固件到WETRANSFER
+  UPLOAD_WETRANSFER: true
+  #==========================
+  # 时区
+  TZ: Asia/Shanghai
+  #==========================
+  # Specify here your config file
+  # 在这里指定你的配置文件名
+  CONFIG_FILE: "acrh17m.config"
+on:
+  push:
+    paths:
+      #==========================
+      - "acrh17m.config"
+      # 改成和上方CONFIG_FILE 一样
+      #==========================
+    branches:
+      - master
+  #==========================
+  #取消下方注释 = 发布release就编译
+  #  release:
+  #    types: [published]
+  #==========================
+  #取消下方注释 = 每天凌晨4点编译
+  schedule:
+    - cron: 0 20 * * *
+  #==========================
+  #取消下方注释 = 点[★star]一键编译
+  watch:
+    types: [started]
+#==========================
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+      - name: Checkout 抓取当前仓库
+        uses: actions/checkout@master
+
+      - name: Space cleanup 腾出空间+安装包
+        run: |
+          docker rmi `docker images -q`
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+          sudo -E apt-get update
+          sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+          sudo -E apt-get -y autoremove --purge
+          sudo -E apt-get clean
+
+      - name: Clone source code 抓取仓库
+        run: git clone $REPO_URL -b $REPO_BRANCH openwrt
+
+      - name: Update feeds 更新feeds
+        run: cd openwrt && ./scripts/feeds update -a
+
+      - name: Install feeds 安装feeds
+        run: cd openwrt && ./scripts/feeds install -a
+
+      - name: Load custom configuration 读取自定义配置
+        run: |
+          [ -e files ] && mv files openwrt/files
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+          chmod +x $DIY_SH
+          cd openwrt
+          ../$DIY_SH
+          make defconfig
+
+      - name: Download package 下载插件资源
+        run: |
+          cd openwrt && make download -j8
+          find dl -size -1024c -exec rm -f {} \;
+
+      - name: Build 开始编译
+        run: |
+          cd openwrt
+          echo "$(nproc) thread build."
+          make -j$(nproc) || make -j1 V=s
+
+      - name: Upload bin directory 上传bin文件夹
+        uses: actions/upload-artifact@master
+        if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+        with:
+          name: OpenWrt_bin bin文件夹
+          path: openwrt/bin
+
+      - name: Organize files 整理文件
+        id: organize
+        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        run: |
+          cd openwrt/bin/targets/*/*
+          rm -rf packages
+          echo "::set-env name=FIRMWARE::$PWD"
+          echo "::set-output name=status::success"
+
+      - name: Upload firmware 上传固件
+        uses: actions/upload-artifact@master
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        with:
+          name: OpenWrt_firmware
+          path: ${{ env.FIRMWARE }}
+
+      - name: Upload firmware to cowtransfer 上传固件到to cowtransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+
+      - name: Upload firmware to WeTransfer 上传固件到to WeTransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
