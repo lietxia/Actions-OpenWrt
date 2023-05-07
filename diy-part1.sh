@@ -19,3 +19,12 @@ echo "src-git helloworld https://github.com/fw876/helloworld">>feeds.conf.defaul
 #sed -i 's/export GOPROXY/#export GOPROXY/g' package/lean/v2ray-plugin/Makefile;
 # Add a feed source
 #sed -i '$a src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.default
+
+
+#允许ROOT编译
+export FORCE_UNSAFE_CONFIGURE=1
+
+#报错修复
+
+cp /usr/bin/upx /workdir/openwrt/staging_dir/host/bin/
+cp /usr/bin/upx-ucl /workdir/openwrt/staging_dir/host/bin/
