@@ -23,6 +23,7 @@ on:
     branches:
       - master
   repository_dispatch:
+  workflow_dispatch:
   #==========================
   #取消下方注释 = 每天凌晨4点编译
   #schedule:
