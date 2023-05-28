@@ -11,8 +11,8 @@
 #
 
 # Uncomment a feed source
-mkdir -p package/base-files/files/config
-echo 0xDEADBEEF > package/base-files/files/config/google_fu_mode
+#mkdir -p package/base-files/files/config
+#echo 0xDEADBEEF > package/base-files/files/config/google_fu_mode
 #sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
 cp feeds.conf.default feeds.conf
 echo "src-git helloworld https://github.com/fw876/helloworld">>feeds.conf
