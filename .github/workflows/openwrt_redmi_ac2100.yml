@@ -134,15 +134,10 @@ jobs:
       - name: Check space usage 检查空间用量
         if: (!cancelled())
         run: |
-          df -hT
           echo "======================="
           echo "Space usage:"
           echo "======================="
-          df -h
-          echo "======================="
-          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
-          du -h --max-depth=1 ./build_dir
-          du -h --max-depth=1 ./bin
+          df -hT
 
       - name: Upload bin directory 上传bin文件夹
         uses: actions/upload-artifact@main
