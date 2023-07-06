@@ -168,20 +168,11 @@ jobs:
           name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
           path: ${{ env.FIRMWARE }}
 
-      - name: Generate release tag 创建GitHub release标签
-        id: tag
-        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-        run: |
-          echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
-          touch release.txt
-          echo "status=success" >> $GITHUB_OUTPUT
-
       - name: Upload firmware to release 上传固件到github release
         uses: softprops/action-gh-release@v1
         if: steps.tag.outputs.status == 'success' && !cancelled()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
-          body_path: release.txt
+          tag_name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
           files: ${{ env.FIRMWARE }}/*
